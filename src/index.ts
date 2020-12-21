@@ -1,23 +1,23 @@
-type Extra = {
+type Options = {
   type: 'string' | 'number' | 'bigint' | 'boolean' | 'symbol' | 'undefined' | 'object' | 'function';
-  expires: number | 'long';
-}
+  expires: number | 'infinity';
+};
 
 class StorageValue<T> {
   value!: T;
   type!: 'string' | 'number' | 'bigint' | 'boolean' | 'symbol' | 'undefined' | 'object' | 'function';
-  expires: number | 'long';
+  expires: number | 'infinity';
   update!: number;
 
-  constructor(value: T, extra: Extra) {
+  constructor(value: T, options: Options) {
     this.value = value;
-    this.type = extra.type;
-    this.expires = extra.expires;
+    this.type = options.type;
+    this.expires = options.expires;
     this.update = Date.now();
   }
 }
 
-export class GeedStorage {
+class GeedStorage {
 
   private type!: 'session' | 'local';
   private prefix = 'Geed_';
@@ -77,7 +77,7 @@ export class GeedStorage {
     return this.storage.clear();
   }
 
-  private serialize(value: any, expires: number | 'long'): string {
+  private serialize(value: any, expires: number | 'infinity'): string {
     const type = typeof value;
     let val: any;
     if (['bigint', 'symbol', 'function'].includes(type)) {
@@ -102,3 +102,7 @@ export class GeedStorage {
   }
 
 }
+
+export { GeedStorage };
+
+export default GeedStorage;
