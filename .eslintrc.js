@@ -25,14 +25,14 @@ const eslintConfig = {
         map: [
           ['@', './src'],
         ],
-        extensions: ['.js', '.ts'],
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
       },
     },
-    'import/extensions': ['.js', '.ts'],
+    'import/extensions': ['.js', '.jsx', '.ts', '.tsx'],
   },
   overrides: [
     {
-      files: ['*.ts'],
+      files: ['*.ts', '*.tsx'],
       rules: {
         // The core 'no-unused-vars' rules (in the eslint:recommeded ruleset)
         // does not work with type definitions
@@ -43,7 +43,9 @@ const eslintConfig = {
   rules: {
     'import/extensions': ['error', 'always', {
       js: 'never',
+      jsx: 'never',
       ts: 'never',
+      tsx: 'never',
     }],
     'import/no-absolute-path': 'off',
     'import/prefer-default-export': 'off',

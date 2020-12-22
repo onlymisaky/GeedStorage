@@ -10,8 +10,7 @@ const webpackConfig = {
   },
   output: {
     path: path.resolve(__dirname),
-    filename: 'dist/index.js',
-    library: '[name]',
+    filename: 'dist/[name].js',
     libraryTarget: 'umd',
     globalObject: 'typeof self !== \'undefined\' ? self : this',
   },
@@ -33,7 +32,11 @@ const webpackConfig = {
       },
     ],
   },
-  plugins: [new ESLintPlugin()],
+  plugins: [
+    new ESLintPlugin({
+      extensions: ['ts'],
+    }),
+  ],
 };
 
 module.exports = webpackConfig;
