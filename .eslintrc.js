@@ -5,10 +5,10 @@ const eslintConfig = {
     browser: true,
     node: true,
   },
+  parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 2020,
     sourceType: 'module',
-    parser: '@typescript-eslint/parser',
     ecmaFeatures: {
       tsx: true,
       jsx: true,
@@ -62,6 +62,7 @@ const eslintConfig = {
     'no-restricted-syntax': 'off',
     'guard-for-in': 'off',
     'arrow-body-style': 'off',
+    'class-methods-use-this': 'off',
   },
 };
 

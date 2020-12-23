@@ -1,7 +1,13 @@
 /** @type {import('@babel/core').TransformOptions} */
 const transformOptions = {
-  plugins: [
-    '@babel/plugin-proposal-optional-chaining',
+  presets: [
+    [
+      '@babel/preset-env',
+      {
+        modules: false,
+      },
+    ],
+    '@babel/typescript',
   ],
 };
 

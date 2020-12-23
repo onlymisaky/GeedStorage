@@ -1,9 +1,10 @@
-import { StorageValue } from './StorageValue'
+import { StorageValue } from './StorageValue';
 
 class GeedStorage {
-
   private type!: 'session' | 'local';
+
   private prefix = 'Geed_';
+
   private storage!: Storage;
 
   constructor(options: { type?: 'session' | 'local'; prefix?: string; } = { type: 'session', prefix: 'Geed_' }) {
@@ -16,12 +17,14 @@ class GeedStorage {
     const val = this.serialize(value, options?.expires as number);
     return this.storage.setItem(`${this.prefix}${key}`, val);
   }
+
   get<T>(key: string): T | null {
     let storageValue;
     storageValue = this.storage.getItem(`${this.prefix}${key}`);
     if (storageValue) {
       storageValue = JSON.parse(storageValue) as StorageValue<T>;
-      let { expires, type, value, update } = storageValue;
+      const { expires, type, update } = storageValue;
+      let { value } = storageValue;
       const isExpired = this.isExpired(update, expires);
       if (isExpired) {
         this.remove(key);
@@ -53,9 +56,11 @@ class GeedStorage {
     }
     return null;
   }
+
   remove(key: string) {
-    return this.storage.removeItem(`${this.prefix}${key}`)
+    return this.storage.removeItem(`${this.prefix}${key}`);
   }
+
   clearAll() {
     return this.storage.clear();
   }
@@ -64,17 +69,16 @@ class GeedStorage {
     const type = typeof value;
     let val: any;
     if (['bigint', 'symbol', 'function'].includes(type)) {
-      val = new StorageValue('', { type, expires })
-    }
-    else {
-      val = new StorageValue(value, { type, expires })
+      val = new StorageValue('', { type, expires });
+    } else {
+      val = new StorageValue(value, { type, expires });
     }
     return JSON.stringify(val);
   }
 
   private isExpired(update: number, expires: any): boolean {
     const expireDate = parseInt(expires, 10);
-    if (isNaN(expireDate)) {
+    if (Number.isNaN(expireDate)) {
       return false;
     }
     const now = Date.now();
@@ -83,7 +87,6 @@ class GeedStorage {
     }
     return false;
   }
-
 }
 
 export { GeedStorage };

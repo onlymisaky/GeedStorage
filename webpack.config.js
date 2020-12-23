@@ -6,7 +6,7 @@ const webpackConfig = {
   mode: 'production',
   devtool: 'source-map',
   entry: {
-    index: path.resolve(__dirname, './src/index.ts'),
+    'geed-storage': path.resolve(__dirname, './src/index.ts'),
   },
   output: {
     path: path.resolve(__dirname),
