@@ -1,9 +1,9 @@
 # GeedStorage
 
-支持 `josn` 的本地存储。
+支持 `json` 的本地存储。
 
 ## Features
-- 支持存储和读出 `string`、`numer`、`object`、`boolean`、`undefined`.
+- 支持存储和读取 `string`、`numer`、`object`、`boolean`、`undefined`
 - 支持设置存储key的前辍
 - 支持设置过期时间
 - 友好的类型提示
@@ -25,10 +25,7 @@ storage.set('user', { name: 'qq', age: 18 }, { expires: 1000 * 60 }); // 1分钟
 storage.get('age'); // 'qq' string
 storage.get('name'); // 18 numer
 storage.get('busy'); // true boolean
-storage.get<{
-  name: string;
-  age: number
-}>('user'); // { name: 'qq', age: 18 }
+storage.get<{ name: string; age: number; }>('user'); // { name: 'qq', age: 18 }
 
 /** remove */
 

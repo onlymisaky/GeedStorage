@@ -1,7 +1,7 @@
 {
   "name": "geed-storage",
   "version": "0.0.1",
-  "description": "支持 `josn` 的本地存储。",
+  "description": "支持 `json` 的本地存储。",
   "main": "dist/geed-storage.js",
   "typings": "dist/typings/index.d.ts",
   "files": [
