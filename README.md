@@ -1,9 +1,9 @@
 # GeedStorage
 
-支持 `json` 的本地存储。
+支持 内存存储， `json` 本地存储。
 
 ## Features
-- 支持存储和读取 `string`、`numer`、`object`、`boolean`、`undefined`
+- 支持所有数据类型存储和读取，本地存储方案仅支持 `string`、`numer`、`object`、`boolean`、`undefined`
 - 支持设置存储key的前辍
 - 支持设置过期时间
 - 友好的类型提示
@@ -11,7 +11,7 @@
 ## API
 ```typescript
 const storage = new GeedStorage({
-  type: 'local', // local | session
+  type: 'local', // local | session | memory
   prefix: 'Geed_', // 默人为 Geed_
 });
 
@@ -28,8 +28,12 @@ storage.get('busy'); // true boolean
 storage.get<{ name: string, age: number }>('user'); // { name: 'qq', age: 18 }
 
 /** remove */
-
 storage.remove('busy'); // remove busy
+storage.clear(); // clear all keys
 
-storage.clearAll(); // clear all keys
+/** keys */
+storage.keys(); // ['name', 'age', 'user', 'busy']
+
+/** length */
+storage.length; // 3
 ```
