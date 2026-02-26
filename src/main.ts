@@ -6,7 +6,7 @@ console.log('Testing GeedStorage...');
 
 // 测试 localStorage 模式
 const storage = new GeedStorage({
-  type: 'local',
+  mode: 'localStorage',
 });
 
 // 设置值
@@ -28,8 +28,7 @@ console.log('After remove version:', storage.get('version'));
 
 // 测试 sessionStorage 模式
 const sessionStorage = new GeedStorage({
-  type: 'session',
-  prefix: 'session_',
+  mode: 'sessionStorage',
 });
 
 sessionStorage.set('user', { id: 1, name: 'Test User' });
@@ -37,8 +36,7 @@ console.log('session user:', sessionStorage.get('user'));
 
 // 测试 memoryCache 模式
 const memoryStorage = new GeedStorage({
-  type: 'memory',
-  prefix: 'memory_',
+  mode: 'memory',
 });
 
 memoryStorage.set('temp', 'temporary data');

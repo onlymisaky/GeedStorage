@@ -1,8 +1,8 @@
-import type { IStorage, StorageType } from './types';
+import type { IStorage, StorageMode } from './types';
 import { StorageValue } from './StorageValue';
 
 class GeedStorage implements IStorage {
-  private type!: StorageType;
+  private storageMode!: StorageMode;
 
   private prefix = 'Geed_';
 
@@ -10,14 +10,14 @@ class GeedStorage implements IStorage {
 
   private memoryStorage!: Map<string, StorageValue<any>>;
 
-  constructor(options: { type?: StorageType, prefix?: string } = { type: 'memory', prefix: 'Geed_' }) {
-    this.type = options.type || 'memory';
+  constructor(options: { mode?: StorageMode, prefix?: string } = { mode: 'memory', prefix: 'Geed_' }) {
+    this.storageMode = options.mode || 'memory';
     this.prefix = options.prefix || 'Geed_';
-    if (this.type === 'memory' || !window.sessionStorage || !window.localStorage) {
+    if (this.storageMode === 'memory' || !window.sessionStorage || !window.localStorage) {
       this.memoryStorage = new Map();
     }
     else {
-      this.storage = this.type === 'session' ? window.sessionStorage : window.localStorage;
+      this.storage = this.storageMode === 'sessionStorage' ? window.sessionStorage : window.localStorage;
     }
   }
 
@@ -26,18 +26,17 @@ class GeedStorage implements IStorage {
   }
 
   set<T>(key: string, value: T, options?: { expires?: number }) {
-    if (this.type === 'memory') {
+    if (this.storageMode === 'memory') {
       const val = new StorageValue(value, {
-        type: typeof value,
-        expires: options?.expires || 'infinity',
+        expires: options?.expires,
       });
       this.memoryStorage.set(key, val);
-      return true;
+      return this;
     }
 
-    const val = this.serialize(value, options?.expires as number);
+    const val = this.serialize(value, options?.expires);
     this.storage.setItem(`${this.prefix}${key}`, val);
-    return true;
+    return this;
   }
 
   get<T>(key: string): T | undefined {
@@ -45,7 +44,7 @@ class GeedStorage implements IStorage {
       return void 0;
     }
 
-    if (this.type === 'memory') {
+    if (this.storageMode === 'memory') {
       const val = this.memoryStorage.get(key);
       if (val) {
         const { expires, update } = val;
@@ -99,7 +98,7 @@ class GeedStorage implements IStorage {
   }
 
   remove(key: string) {
-    if (this.type === 'memory') {
+    if (this.storageMode === 'memory') {
       this.memoryStorage.delete(key);
       return true;
     }
@@ -109,34 +108,40 @@ class GeedStorage implements IStorage {
   }
 
   clear() {
-    if (this.type === 'memory') {
+    if (this.storageMode === 'memory') {
       this.memoryStorage.clear();
-      return true;
+      return this;
     }
 
-    this.storage.clear();
-    return true;
+    const keys = this.keys();
+    keys.forEach((key) => {
+      this.remove(key);
+    });
+    return this;
   }
 
   has(key: string) {
-    if (this.type === 'memory') {
+    if (this.storageMode === 'memory') {
       return this.memoryStorage.has(key);
     }
 
-    return Object.keys(this.storage).includes(`${this.prefix}${key}`);
+    return Object.hasOwn(this.storage, `${this.prefix}${key}`);
   }
 
   keys() {
-    if (this.type === 'memory') {
+    if (this.storageMode === 'memory') {
       return Array.from(this.memoryStorage.keys());
     }
 
-    return Object.keys(this.storage).reduce((keys, key) => {
-      if (key.startsWith(this.prefix)) {
-        return [...keys, key.replace(this.prefix, '')];
+    const keys = [];
+    for (const key in this.storage) {
+      if (Object.hasOwn(this.storage, key)) {
+        if (key.startsWith(this.prefix)) {
+          keys.push(key.replace(this.prefix, ''));
+        }
       }
-      return keys;
-    }, [] as string[]);
+    }
+    return keys;
   }
 
   /**
@@ -146,20 +151,24 @@ class GeedStorage implements IStorage {
     return this.clear();
   }
 
-  private serialize(value: any, expires: number | 'infinity'): string {
+  private serialize(value: any, expires?: number): string {
     const type = typeof value;
     let val: any;
     if (['bigint', 'symbol', 'function'].includes(type)) {
-      val = new StorageValue('', { type, expires });
+      val = new StorageValue('', { expires });
     }
     else {
-      val = new StorageValue(value, { type, expires });
+      val = new StorageValue(value, { expires });
     }
     return JSON.stringify(val);
   }
 
-  private isExpired(update: number, expires: any): boolean {
-    const expireDate = Number.parseInt(expires, 10);
+  private isExpired(update: number, expires?: any): boolean {
+    if (expires === undefined) {
+      return false;
+    }
+
+    const expireDate = Number(expires);
     if (Number.isNaN(expireDate)) {
       return false;
     }

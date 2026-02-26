@@ -11,7 +11,7 @@
 ## API
 ```typescript
 const storage = new GeedStorage({
-  type: 'local', // local | session | memory
+  mode: 'localStorage', // localStorage | sessionStorage | memory
   prefix: 'Geed_', // 默人为 Geed_
 });
 
