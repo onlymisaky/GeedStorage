@@ -1,7 +1,16 @@
 import path from 'node:path';
 import { defineConfig } from 'vite';
+import dts from 'vite-plugin-dts';
 
 export default defineConfig({
+  plugins: [
+    dts({
+      insertTypesEntry: true,
+      rollupTypes: true,
+      outDir: 'dist/typings',
+      tsconfigPath: './tsconfig.json',
+    }),
+  ],
   build: {
     outDir: 'dist',
     sourcemap: true,

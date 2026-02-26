@@ -36,4 +36,7 @@ storage.keys(); // ['name', 'age', 'user', 'busy']
 
 /** length */
 storage.length; // 3
+
+/** has */
+storage.has('name'); // true
 ```
