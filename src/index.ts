@@ -1,24 +1,65 @@
 import { StorageValue } from './StorageValue';
+import { IStorage, StorageType } from './types';
 
-class GeedStorage {
-  private type!: 'session' | 'local';
+class GeedStorage implements IStorage {
+  private type!: StorageType;
 
   private prefix = 'Geed_';
 
   private storage!: Storage;
 
-  constructor(options: { type?: 'session' | 'local'; prefix?: string; } = { type: 'session', prefix: 'Geed_' }) {
-    this.type = options.type || 'session';
+  private memoryStorage!: Map<string, StorageValue<any>>;
+
+  constructor(options: { type?: StorageType; prefix?: string; } = { type: 'memory', prefix: 'Geed_' }) {
+    this.type = options.type || 'memory';
     this.prefix = options.prefix || 'Geed_';
-    this.storage = this.type === 'session' ? sessionStorage : localStorage;
+    if (this.type === 'memory' || !window || !window.sessionStorage || !window.localStorage) {
+      this.memoryStorage = new Map();
+    } else {
+      this.storage = this.type === 'session' ? sessionStorage : localStorage;
+    }
+  }
+
+  get length() {
+    return this.keys().length;
   }
 
   set<T>(key: string, value: T, options?: { expires?: number; }) {
+    if (this.type === 'memory') {
+      const val = new StorageValue(value, {
+        type: typeof value,
+        expires: options?.expires || 'infinity'
+      });
+      this.memoryStorage.set(key, val);
+      return true;
+    }
+
     const val = this.serialize(value, options?.expires as number);
-    return this.storage.setItem(`${this.prefix}${key}`, val);
+    this.storage.setItem(`${this.prefix}${key}`, val);
+    return true;
   }
 
-  get<T>(key: string): T | null {
+  get<T>(key: string): T | undefined {
+    if (!this.has(key)) {
+      return void 0;
+    }
+
+    if (this.type === 'memory') {
+      const val = this.memoryStorage.get(key);
+      if (val) {
+        const { expires, type, update } = val;
+        if (type !== typeof val.value) {
+          return void 0;
+        }
+        const isExpired = this.isExpired(update, expires);
+        if (isExpired) {
+          this.remove(key);
+          return void 0;
+        }
+        return val.value as T;
+      }
+    }
+
     let storageValue;
     storageValue = this.storage.getItem(`${this.prefix}${key}`);
     if (storageValue) {
@@ -28,41 +69,81 @@ class GeedStorage {
       const isExpired = this.isExpired(update, expires);
       if (isExpired) {
         this.remove(key);
-        return null;
+        return void 0;
       }
       switch (type) {
         case 'number':
-          value = Number(value) as unknown as T;
+          value = Number(value) as T;
           break;
         case 'undefined':
-          value = undefined as unknown as T;
+          value = undefined as T;
           break;
         case 'boolean':
-          if (value as unknown as string === 'false') {
-            value = false as unknown as T;
-          } else if (value as unknown as string === 'true') {
-            value = true as unknown as T;
+          if (value as string === 'false') {
+            value = false as T;
+          } else if (value as string === 'true') {
+            value = true as T;
           } else {
-            value = Boolean(value) as unknown as T;
+            value = Boolean(value) as T;
           }
           break;
         case 'string':
-          value = `${value}` as unknown as T;
+          value = `${value}` as T;
           break;
         default:
           break;
       }
       return value;
     }
-    return null;
+    return void 0;
   }
 
   remove(key: string) {
-    return this.storage.removeItem(`${this.prefix}${key}`);
+    if (this.type === 'memory') {
+      this.memoryStorage.delete(key);
+      return true;
+    }
+
+    this.storage.removeItem(`${this.prefix}${key}`);
+    return true;
   }
 
+  clear() {
+    if (this.type === 'memory') {
+      this.memoryStorage.clear();
+      return true;
+    }
+
+    this.storage.clear();
+    return true;
+  }
+
+  has(key: string) {
+    if (this.type === 'memory') {
+      return this.memoryStorage.has(key);
+    }
+
+    return Object.keys(this.storage).includes(`${this.prefix}${key}`);
+  }
+
+  keys() {
+    if (this.type === 'memory') {
+      return Array.from(this.memoryStorage.keys());
+    }
+
+    return Object.keys(this.storage).reduce((keys, key) => {
+      if (key.startsWith(this.prefix)) {
+        return [...keys, key.replace(this.prefix, '')];
+      }
+      return keys;
+    }, [] as string[])
+  }
+
+  /**
+   * @deprecated Use clear() instead
+   */
   clearAll() {
-    return this.storage.clear();
+    return this.clear();
   }
 
   private serialize(value: any, expires: number | 'infinity'): string {

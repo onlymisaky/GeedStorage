@@ -1,4 +1,4 @@
-type ValueType = 'string' | 'number' | 'bigint' | 'boolean' | 'symbol' | 'undefined' | 'object' | 'function';
+import { ValueType } from "./types";
 
 interface Options {
   type: ValueType;
@@ -8,7 +8,7 @@ interface Options {
 export class StorageValue<T> {
   value!: T;
 
-  type!: 'string' | 'number' | 'bigint' | 'boolean' | 'symbol' | 'undefined' | 'object' | 'function';
+  type!: ValueType;
 
   expires: number | 'infinity';
 
