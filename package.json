@@ -1,6 +1,6 @@
 {
   "name": "geed-storage",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "支持 `json` 的本地存储。",
   "author": "onlymisaky",
   "license": "ISC",
@@ -20,6 +20,7 @@
   ],
   "exports": {
     ".": {
+      "types": "./dist/typings/index.d.ts",
       "import": "./dist/geed-storage.js",
       "require": "./dist/geed-storage.umd.js"
     }
