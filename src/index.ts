@@ -1,5 +1,5 @@
+import type { IStorage, StorageType } from './types';
 import { StorageValue } from './StorageValue';
-import { IStorage, StorageType } from './types';
 
 class GeedStorage implements IStorage {
   private type!: StorageType;
@@ -10,13 +10,14 @@ class GeedStorage implements IStorage {
 
   private memoryStorage!: Map<string, StorageValue<any>>;
 
-  constructor(options: { type?: StorageType; prefix?: string; } = { type: 'memory', prefix: 'Geed_' }) {
+  constructor(options: { type?: StorageType, prefix?: string } = { type: 'memory', prefix: 'Geed_' }) {
     this.type = options.type || 'memory';
     this.prefix = options.prefix || 'Geed_';
-    if (this.type === 'memory' || !window || !window.sessionStorage || !window.localStorage) {
+    if (this.type === 'memory' || !window.sessionStorage || !window.localStorage) {
       this.memoryStorage = new Map();
-    } else {
-      this.storage = this.type === 'session' ? sessionStorage : localStorage;
+    }
+    else {
+      this.storage = this.type === 'session' ? window.sessionStorage : window.localStorage;
     }
   }
 
@@ -24,11 +25,11 @@ class GeedStorage implements IStorage {
     return this.keys().length;
   }
 
-  set<T>(key: string, value: T, options?: { expires?: number; }) {
+  set<T>(key: string, value: T, options?: { expires?: number }) {
     if (this.type === 'memory') {
       const val = new StorageValue(value, {
         type: typeof value,
-        expires: options?.expires || 'infinity'
+        expires: options?.expires || 'infinity',
       });
       this.memoryStorage.set(key, val);
       return true;
@@ -47,10 +48,7 @@ class GeedStorage implements IStorage {
     if (this.type === 'memory') {
       const val = this.memoryStorage.get(key);
       if (val) {
-        const { expires, type, update } = val;
-        if (type !== typeof val.value) {
-          return void 0;
-        }
+        const { expires, update } = val;
         const isExpired = this.isExpired(update, expires);
         if (isExpired) {
           this.remove(key);
@@ -81,9 +79,11 @@ class GeedStorage implements IStorage {
         case 'boolean':
           if (value as string === 'false') {
             value = false as T;
-          } else if (value as string === 'true') {
+          }
+          else if (value as string === 'true') {
             value = true as T;
-          } else {
+          }
+          else {
             value = Boolean(value) as T;
           }
           break;
@@ -136,7 +136,7 @@ class GeedStorage implements IStorage {
         return [...keys, key.replace(this.prefix, '')];
       }
       return keys;
-    }, [] as string[])
+    }, [] as string[]);
   }
 
   /**
@@ -151,14 +151,15 @@ class GeedStorage implements IStorage {
     let val: any;
     if (['bigint', 'symbol', 'function'].includes(type)) {
       val = new StorageValue('', { type, expires });
-    } else {
+    }
+    else {
       val = new StorageValue(value, { type, expires });
     }
     return JSON.stringify(val);
   }
 
   private isExpired(update: number, expires: any): boolean {
-    const expireDate = parseInt(expires, 10);
+    const expireDate = Number.parseInt(expires, 10);
     if (Number.isNaN(expireDate)) {
       return false;
     }
@@ -170,6 +171,6 @@ class GeedStorage implements IStorage {
   }
 }
 
-export { GeedStorage };
+// export { GeedStorage };
 
 export default GeedStorage;

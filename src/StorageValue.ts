@@ -1,8 +1,8 @@
-import { ValueType } from "./types";
+import type { ValueType } from './types';
 
 interface Options {
-  type: ValueType;
-  expires: number | 'infinity';
+  type: ValueType
+  expires: number | 'infinity'
 }
 
 export class StorageValue<T> {

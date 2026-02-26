@@ -11,8 +11,8 @@
 ## API
 ```typescript
 const storage = new GeedStorage({
-  type: 'local',    // local | session
-  prefix: 'Geed_',  // 默人为 Geed_
+  type: 'local', // local | session
+  prefix: 'Geed_', // 默人为 Geed_
 });
 
 /** set */
@@ -25,7 +25,7 @@ storage.set('user', { name: 'qq', age: 18 }, { expires: 1000 * 60 }); // 1分钟
 storage.get('age'); // 'qq' string
 storage.get('name'); // 18 numer
 storage.get('busy'); // true boolean
-storage.get<{ name: string; age: number; }>('user'); // { name: 'qq', age: 18 }
+storage.get<{ name: string, age: number }>('user'); // { name: 'qq', age: 18 }
 
 /** remove */
 
